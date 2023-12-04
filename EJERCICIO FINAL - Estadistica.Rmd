@@ -1,0 +1,399 @@
+---
+title: "Modulo 5: ESTADÍSTICA"
+output: html_notebook
+---
+
+#
+#
+#
+
+La estadística es una rama de las matemáticas que consiste en obtener, ordenar y analizar una serie de datos para obtener conclusiones y predicciones sobre fenómenos observados.
+
+En el ámbito empresarial nos ayuda en la toma de decisiones en condiciones de variabilidad o de incertidumbre.
+
+El método estadístico consiste en usar el método científico para la investigación teórica. Para ello hay que seguir una serie de etapas:
+
+
+
+## 1. FORMULACIÓN DEL PROBLEMA Y DEFINICIÓN DE OBJETIVOS
+
+Es muy importante la delimitación del problema a resolver, planteándose las preguntas necesarias para el entendimiento de las necesidades del negocio.
+
+En este caso, vamos a hacer uso de la base de datos descargada de kaggle llamada Advertising Sales Dataset que podemos encontrar en el siguiente enlace (https://www.kaggle.com/datasets/yasserh/advertising-sales-dataset). Este dataset ha sido creado por una profesora para el uso de sus alumnos por lo que los datos no son reales. Pero para poder hacer un análisis apropiado, vamos a imaginarnos que son datos de productoras de cine debido a las grandes cifras que se manejan en él.
+
+En este dataset podemos encontrar 5 campos diferentes, siendo estos, el identificador de cada observación (entre 1 y 200), los presupuestos en publicidad en televisión, radio y prensa y las ventas totales para 200 compañías diferentes. Los presupuestos están expresados en miles de dólares y las ventas en millones de dólares. Por lo tanto, tenemos un total de 5 variables y 200 observaciones.
+
+Los tipos de variables son los siguientes:
+
+ - El identificador de las empresas productoras de cine es una variable cuantitativa discreta ya que toma valores numéricos definidos previamente, siendo estos valores entre el 1 y el 200
+ 
+ - Los presupuestos de las distintas campañas publicitarias y las ventas totales, es decir, las otras 4 variables, son variables cuantitativas continuas ya que pueden tomar cualquier valor dentro del eje real.
+ 
+ 
+Como analistas queremos analizar cuál de las distintas formas de publicitarse es más efectiva para que el volumen total vendido de entradas sea el mayor posible y cuál de ellas la menos influyente para poder minimizar los costes en publicidad sin perder un volumen considerable de ventas. Es decir, ver si algunos de los presupuestos que se dedican a publicidad tiene poca relación con las ventas finales alcanzadas.
+
+Para ello, lo primero que necesitamos hacer es leer el archivo con los datos y ver una muestra de los mismos para saber cómo está estructurado este dataset.
+
+
+```{r}
+dato <- read.csv("C:/Users/viole/OneDrive/Documentos/MASTER 22/5. ESTADISTICA PARA EL CIENTIFICO DE DATOS/CASO FINAL/Advertising Budget and Sales.csv")
+head(dato,10)
+```
+
+
+
+
+## 2. EXPLORACIÓN DE LOS DATOS
+
+Para hacer un análisis de los datos a través de métodos estadísticos se necesita hacer uso de métodos descriptivos y métodos inferenciales. En este segundo apartado nos vamos a centrar en los métodos descriptivos.
+
+
+La estadística descriptiva es un conjunto de procedimientos que nos permiten resumir un conjunto de datos gracias al uso de métodos matemáticos y gráficos. Este análisis tiene dos objetivos:
+
+ -	Describir las variables que se van a estudiar, y
+ 
+ -	Controlar la calidad de los datos detectando posibles errores y corregirlos en caso de ser necesario.
+ 
+ 
+El análisis descriptivo depende del tipo de variables que estemos estudiado. Como comentamos en el apartado anterior, las variables son cuantitativas. Por ello, vamos a usar medidas de tendencia central, como la media o la mediana, y medidas de dispersión, como la varianza y desviación típica, junto con gráficos como el histograma y los diagramas de cajas. Veámoslo con los datos.
+
+En primer lugar, vamos a hacer un resumen estadístico de las distintas variables:
+
+```{r}
+summary(dato)
+```
+Como vemos en este resumen estadístico de las distintas columnas, podemos decir que:
+
+ -	El ID de las compañías toma como valor mínimo 1 y como máximo 200, es decir, tenemos 200 observaciones de empresas productoras de cine. Para nuestro análisis esta columna es irrelevante así que vamos a eliminarla.
+
+ -	Para el presupuesto publicitario en televisión, vemos que los valores se mueven en el rango de 0.7 y 296.4 miles de dólares, con una media de 147.04 miles de dólares la cual es ligeramente inferior a la mediana lo que nos revela que la distribución de esta variable está sesgada a la izquierda, como veremos más adelante en la representación gráfica.
+
+ -	En el caso de la radio, obtenemos un rango entre 0 y 49.6 miles de dólares, con una media de 23.264. La mediana es menor que la media lo que nos dice que la distribución está segada a la derecha.
+
+ -	El presupuesto en la prensa toma valores en torno a 0.3 y 114 miles de dólares. En este caso, la media es de 30.55, mientras que la mediana es de 25.75, por lo que podemos saber de antemano que, como en el caso de la radio, la distribución tiene un sesgo a la derecha.
+
+ -	Por último, las ventas están entre 1.6 y 27 millones de dólares, con una media de 14.02 y una mediana de 12.9. De nuevo, sabemos que la distribución no es simétrica estando sesgada a la derecha.
+
+
+```{r}
+install.packages("dplyr")
+library(dplyr)
+```
+
+```{r}
+datos <- select(dato, -ID)
+head(datos)
+```
+
+Una vez eliminada la columna del identificador, vamos a proceder a analizar si hay valores faltantes.
+
+```{r}
+install.packages("Rtools")
+install.packages("DataExplorer")
+library(DataExplorer)
+
+```
+
+
+```{r}
+plot_missing(datos)
+```
+
+Como podemos ver, no existen valores faltantes para ninguna de las columnas.
+
+El siguiente paso es crear un informe con los datos. Esta función nos crea un análisis completo del dataset el cual se descarga como un html, el cual adjuntaré en la carpeta comprimida. Para tener una visualización completa aquí, vamos a realizar manualmente una serie de gráficos y análisis que corroboran lo obtenido en el informe.
+
+```{r}
+create_report(datos)
+```
+
+
+```{r}
+par(mfrow=c(2,2))
+boxplot(datos$TV.Ad.Budget, main= "PRESUPUESTO TV")
+boxplot(datos$Radio.Ad.Budget, main= "PRESUPUESTO RADIO")
+boxplot(datos$Newspaper.Ad.Budget, main= "PRESUPUESTO PRENSA")
+hist(datos$Sales, main= "VENTAS", breaks=20)
+```
+Visualmente podemos ver que tanto la distribución del **presupuesto en televisión** y del **presupuesto en la radio** es simétrico. Para comprobar esto vamos a ver si la diferencia entre el percentil 25 y la mediana es similar a la distancia entre el percentil 75 y la mediana. Estos datos se encuentran en el análisis estadístico hecho anteriormente para las distintas columnas.
+
+```{r}
+# PRESUPUESTO EN TV
+149.75-74.38
+218.82-149.75
+```
+```{r}
+# PRESUPUESTO EN RADIO
+22.900-9.975
+36.525-22.900
+```
+Como vemos, las distancias son muy similares por lo que vamos a definir la media como descriptivo de tendencia central y la desviación estándar como descriptivo de dispersión para ambas variables.
+
+```{r}
+# PRESUPUESTO EN TV
+mean(datos$TV.Ad.Budget)
+sd(datos$TV.Ad.Budget)
+```
+En este caso, los valores se concentran alrededor de 147 miles de dólares con una dispersión de 85.8 miles de dólares respecto a la media.
+
+
+```{r}
+# PRESUPUESTO EN RADIO
+mean(datos$Radio.Ad.Budget)
+sd(datos$Radio.Ad.Budget)
+```
+Podemos ver que lo valores se concentran en torno a 23 miles de dólares con una dispersión respecto a este valor de casi 15 miles de dólares.
+
+
+En el caso del **presupuesto en prensa**, claramente la distribución no es simétrica. También observamos la presencia de outliers. Por ello, para esta variable vamos a calcular la mediana y el rango intercuartílico.
+
+
+```{r}
+# PRESUPUESTO EN PRENSA
+median(datos$Newspaper.Ad.Budget)
+IQR(datos$Newspaper.Ad.Budget)
+```
+El valor que ocupa el valor medio, es decir, el valor 100 una vez ordenados, en esta distribución es 25.75 miles de dólares, mientras que la diferencia entre el valor que ocupa la posición 50 y 150 es de 32.35 miles de dólares. Al ser un número de observaciones par, se ha calculado haciendo la media de los valores que ocupan los lugares centrales, el 100 y 101 para la mediana, el 50 y 51 para el cuartil 25 y el 150 y 151 para el 75.
+
+
+Para el caso de los valores atípicos que vemos en grafico de caja, vamos a ver que valores toman y cuantos son.
+
+
+
+```{r}
+# ANALISIS DE LOS OUTLIERS
+boxplot.stats(datos$Newspaper.Ad.Budget)
+
+```
+Como vemos, son dos los valores atípicos, por lo que vamos a proceder a no eliminarlos ya que podrían representar información valiosa de la población.
+
+Continuando con el análisis, vamos a proceder a ver que vinculación existe entre las distintas variables y el volumen de ventas. Para ello vamos a hacer uso del coeficiente de correlación de Pearson, el cual mide el grado de relación entre distintas variables cuantitativas relacionándolas linealmente.
+
+En primer lugar, vamos a hacer una representación entre las variables para ver si efectivamente tenemos una relación lineal entre las variables, ya que, de no ser así, no debería de ser aplicado este índice.
+
+
+
+```{r}
+par(mfrow=c(2,2))
+plot(datos$TV.Ad.Budget,datos$Sales)
+plot(datos$Radio.Ad.Budget,datos$Sales)
+plot(datos$Newspaper.Ad.Budget,datos$Sales)
+```
+Para la relación entre las ventas totales y el presupuesto invertido en las campañas publicitarias tanto en televisión como en radio podemos ver que existe una relación lineal positiva, por lo que vamos a proceder a calcular el coeficiente de Pearson. En el caso de la relación entre las ventas y el presupuesto de lo invertido en publicidad en prensa, podemos ver visualmente que la relación lineal es mucho más débil que para las otras dos variables.
+
+
+```{r}
+library(corrplot)
+```
+
+
+```{r}
+cor(datos$TV.Ad.Budget,datos$Sales)
+cor(datos$Radio.Ad.Budget,datos$Sales)
+cor(datos$Newspaper.Ad.Budget,datos$Sales)
+```
+La correlación entre el presupuesto en televisión y radio es alta o fuerte, ya que toma valores superiores a 0.5. Mientras que, para el periódico, encontramos una correlación que, aun no siendo despreciable, es baja ya que se encuentra entre los valores de 0.1 y 0.3.
+
+
+Por último, vamos a analizar si las variables de los presupuestos siguen una distribución normal.
+
+
+```{r}
+par(mfrow=c(2,2))
+hist(datos$TV.Ad.Budget, main= "PRESUPUESTO TV", breaks=20)
+hist(datos$Radio.Ad.Budget, main= "PRESUPUESTO RADIO", breaks=10)
+hist(datos$Newspaper.Ad.Budget, main= "PRESUPUESTO PRENSA", breaks=10)
+```
+
+Como observamos en los histogramas, ninguna de las variables sigue una distribución normal. Analizaremos esto con un contraste de hipótesis en el siguiente apartado.
+Concluyendo este análisis exploratorio de los datos, vamos a hacer un resumen de los indicios que nos han revelado, tanto los gráficos como los descriptivos usados.
+
+ -	En el histograma de la variable ventas podemos ver que sigue una distribución normal asimétrica, es decir la cola derecha es más larga. Mientras que el resto de variables no tienen una distribución normal
+ -	Vemos que el presupuesto invertido en la publicidad realizada en televisión tiene una relación muy fuerte con el volumen de ventas.
+ -	También, destacar la alta relación del presupuesto para la radio y las ventas que, aunque no es tan fuerte como la de la televisión, es importante.
+ -	La variable del presupuesto de la publicidad en prensa tiene una relación muy débil con las ventas de la compañía. A su vez, tenemos dos valores atípicos los cuales tendremos que valorar si nos distorsionan el resultado o si son valores a considerar ya que pueden representar una parte de a la población que no estamos considerando.
+
+
+Por lo tanto, podemos decir que esta muestra nos indica que el modelo de las ventas en las compañías productoras de cine se explica en gran medida por las variables del presupuesto en publicidad en televisión y radio, pudiendo ser la inversión en prensa irrelevante a la hora de obtener un mayor volumen de ventas. Para analizar lo concluido a través del análisis de la muestra y poder sacar conclusiones de la población de estudio vamos a hacer uso de la inferencia estadística y de plantear un modelo de regresión lineal múltiple.
+
+
+
+## 3. ESTADISTICA INFERENCIAL Y DISEÑO DE EXPERIMENTOS
+
+La estadistica inferencial es una rama de la estadistica cuyo objetivo es obtener conclusiones de la población de estudio a partir de la información proporcionada por la muestra. Para llevar a cabo esto, hay dos herramientas: los intervalos de confianza y los contrastes de hipótesis.
+
+
+Primero vamos a calcular el intervalo de confianza al 95% para las ventas de las empresas.
+
+
+```{r}
+t.test(datos$Sales, conf.level=0.95)$conf.int
+```
+Obtenemos que la media de la población de las ventas se encuentra entre 13.29 y 14.75 con un 95% de confianza. El intervalo es bastante estrecho por lo que podemos decir que nos han proporcionado información precisa sobre el parámetro.
+
+
+Seguido, vamos a hacer un contraste de hipótesis para ver si las variables siguen una distribución normal, conocido por contrate de bondad de ajuste. En él vamos a estudiar la normalidad de las 4 variables que toman lugar en este modelo. Para ello, lo primero, es plantear las hipótesis nula y alternativa:
+
+
+- Ho:  La variable de estudio sigue una distribución normal.
+
+- H1:  La variable de estudio no sigue una distribución normal.
+
+
+```{r}
+install.packages("MVN")
+library(MVN)
+```
+
+
+En primer lugar, vamos a crear los gráfico q-q para cada variable, el cual nos indicará si los datos observados cumplen con la distribución hipotética.
+
+```{r}
+mvn(data=datos,  univariatePlot = "qqplot")
+```
+
+
+Vamos a comprobar con el test de Shapiro-wilk si las variables siguen una distribución normal o no.
+
+
+```{r}
+mvn(data = datos, univariateTest = "SW", desc = TRUE)
+```
+
+
+
+Como observamos los p-valores son inferiores a 0.05 que es el nivel de significación seleccionado, por lo que hay que rechazar la hipótesis nula, es decir, ninguna de nuestras variables sigue una distribución normal. Por lo que vamos a proceder a normalizarlas.
+
+Cuando estandarizamos variables estamos centrándolas al rededor del valor 0 con una varianza de 1. Para realizar esta transformación vamos a usar la función scale.
+
+
+
+
+```{r}
+datos_std <- scale(datos)
+summary(datos_std)
+
+```
+
+Todas las medias de las distintas variables equivalen a 0, es decir, están normalizadas. Para comprobar esta afirmación vamos a representar de nuevo estas variables con un histograma y seguidamente, con un gráfico q-q.
+
+
+```{r}
+par(mfrow=c(2,2))
+hist(datos_std[,"Sales"])
+hist(datos_std[,"TV.Ad.Budget"])
+hist(datos_std[,"Radio.Ad.Budget"])
+hist(datos_std[,"Newspaper.Ad.Budget"])
+```
+
+Como observamos los gráficos son muy parecidos a los primeros que representamos, pero las escalas han cambiado.
+
+
+
+```{r}
+mvn(data=datos_std, univariatePlot = "qqplot")
+```
+A su vez, el cambio en los gráficos q-q es también inapreciable a excepción de las escalas.
+
+
+A continuación, vamos a realizar un modelo de regresión multivariante. Este es una extensión natural del modelo de regresión lineal simple que consiste en considerar más de una variable explicativa. 
+
+Para ello, vamos a empezar haciendo un analisis univariante para finalizar con un analisis multivariante.
+
+
+1. Vamos a hacer un análisis univariable para la selección de las variables. Nos fijaremos en el coeficiente de determinación R2 y el p-valor
+
+
+
+```{r}
+modelo_1 <- lm(datos$Sales ~ datos$TV.Ad.Budget)
+summary(modelo_1)
+```
+
+
+Existe una relación lineal entre el presupuesto en tv y las ventas de la empresa ya que el p-valor toma un valor menor a 0.05. Por cada aumento de una unidad en el presupuesto, las ventas aumentan en 0.048 millones de dólares. Por otro lado, el coeficiente de determinación es de 0.6119, es decir, este presupuesto explica el 61 % de las ventas totales.
+
+
+```{r}
+modelo_2 <- lm(datos$Sales ~ datos$Radio.Ad.Budget)
+summary(modelo_2)
+```
+
+Existe una relación lineal entre el presupuesto en tv y las ventas de la empresa ya que el p-valor toma un valor menor a 0.05. Por cada aumento de una unidad en el presupuesto, las ventas aumentan en 0.2025 millones de dólares. Por otro lado, el coeficiente de determinación es de 0.332, es decir, este presupuesto explica el 33 % de las ventas totales.
+
+
+```{r}
+modelo_3 <- lm(datos$Sales ~ datos$Newspaper.Ad.Budget)
+summary(modelo_3)
+```
+
+Existe una relación lineal entre el presupuesto en tv y las ventas de la empresa ya que el p-valor toma un valor menor a 0.05. Por cada aumento de una unidad en el presupuesto, las ventas aumentan en 0.055 millones de dólares. Por otro lado, el coeficiente de determinación es de 0.0521, es decir, este presupuesto explica el 5 % de las ventas totales.
+
+
+2. Vamos a  proceder con el análisis multivariable
+
+```{r}
+modelo <- lm(datos$Sales ~ datos$TV.Ad.Budget + datos$Radio.Ad.Budget + datos$Newspaper.Ad.Budget)
+summary(modelo)
+```
+El modelo con todas las variables predictoras tiene un R2 alto, pudiendo explicar casi un 90% de la variabilidad observada en las ventas. El p-valor también es óptimo al ser menor de 0.05.
+
+
+Vamos a realizar un modelo backward para seleccionar el mejor conjunto de predictores determinado con el valor matemático Akaike (AIC) y comparar los resultados con el modelo creado anteriormente con todas las variables.
+
+
+```{r}
+step(object=modelo, direcction= "backward", trace=1)
+```
+
+En la salida de R, se observa que con el método backward se parte del total de las variables, y en función del AIC se determina qué variables deben abandonar el modelo. El proceso finaliza cuanto el AIC de referencia es menor que el AIC de las variables predictoras del modelo.
+
+En este caso, se elimina el presupuesto en prensa, quedando de la siguiente manera:
+
+
+```{r}
+modelo_final <- lm(datos$Sales ~ datos$TV.Ad.Budget + datos$Radio.Ad.Budget)
+summary(modelo_final)
+```
+
+Por lo tanto, este modelo, en el que se ha eliminado la variable del presupuesto en prensa, explica casi un 90% de las ventas realizadas por las compañías cineastas. 
+
+Comparando ambos modelos, el que incluye la variable del presupuesto en prensa y el que no, obtenemos un mismo coeficiente de determinación y el mismo p-valor, lo que nos dice que la variable no es relevante para la explicación del modelo de ventas. Es decir, podríamos eliminar los gastos que suponen la inversión en publicidad en la presa que la variación de las ventas una vez eliminado no sería relevante para las compañías.
+
+En conclusión, el modelo más adecuado, es el modelo en el que las variables explicativas son dos:
+
+- El presupuesto en publicidad en la televisión y,
+
+- El presupuesto en publicidad en la radio.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
